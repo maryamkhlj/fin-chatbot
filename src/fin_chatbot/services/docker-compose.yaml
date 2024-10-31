@@ -21,13 +21,18 @@ services:
       - ./logs:/var/log
     ports:
       - "${METRICS_PORT}:${METRICS_PORT}"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import redis; redis.Redis(host='redis').ping()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   redis:
     image: redis:6 
     container_name: fin_chatbot_redis
-    environment:
-      REDIS_HOST: ${REDIS_HOST}
-      REDIS_PORT: ${REDIS_PORT}
+    # environment:
+    #   REDIS_HOST: ${REDIS_HOST}
+    #   REDIS_PORT: ${REDIS_PORT}
     ports:
       - "${REDIS_PORT}:6379"
     volumes:

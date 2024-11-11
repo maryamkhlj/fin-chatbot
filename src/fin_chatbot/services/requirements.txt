@@ -28,6 +28,11 @@ Werkzeug==3.0.4
 yfinance==0.2.26  # Or the version you installed
 redis==5.1.0
 ratelimit==2.2.1
+psycopg2-binary==2.9.9
+finnhub-python==2.4.20
+prometheus_client==0.21.0
+scipy==1.13.1
+fasteners==0.19
 
 # Additional dependencies for Scrapy, LangChain, and OpenAI
 scrapy==2.10.1

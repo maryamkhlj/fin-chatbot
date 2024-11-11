@@ -1,0 +1,15 @@
+2024-10-17 11:20:01 1t1SID-00000P-2Z <= root@localhost U=root P=local S=711
+2024-10-17 11:20:01 1t1SID-00000P-2Z => /var/mail/mail <root@localhost> R=mail4root T=address_file
+2024-10-17 11:20:01 1t1SID-00000P-2Z Completed
+2024-10-17 11:23:01 1t1SL7-00000F-0O <= root@localhost U=root P=local S=711
+2024-10-17 11:23:01 1t1SL7-00000F-0O => /var/mail/mail <root@localhost> R=mail4root T=address_file
+2024-10-17 11:23:01 1t1SL7-00000F-0O Completed
+2024-10-17 11:31:01 1t1SSr-00000O-0g <= root@localhost U=root P=local S=711
+2024-10-17 11:31:01 1t1SSr-00000O-0g => /var/mail/mail <root@localhost> R=mail4root T=address_file
+2024-10-17 11:31:01 1t1SSr-00000O-0g Completed
+2024-10-17 11:39:01 1t1Sab-00000F-0J <= root@localhost U=root P=local S=711
+2024-10-17 11:39:01 1t1Sab-00000F-0J => /var/mail/mail <root@localhost> R=mail4root T=address_file
+2024-10-17 11:39:01 1t1Sab-00000F-0J Completed
+2024-10-17 12:00:01 1t1Suv-00000j-0b <= root@localhost U=root P=local S=730
+2024-10-17 12:00:01 1t1Suv-00000j-0b => /var/mail/mail <root@localhost> R=mail4root T=address_file
+2024-10-17 12:00:01 1t1Suv-00000j-0b Completed

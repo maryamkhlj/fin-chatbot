@@ -1,63 +1,50 @@
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
-[project]
-name = "fin_chatbot"
+[tool.poetry]
+name = "fin-chatbot"
 version = "0.1.0"
-description = "Financial assistant chattbot"
-readme = "README.rst"
-authors = [
-  {name = "Maryam K", email = "audreyr@example.com"}
-]
-maintainers = [
-  {name = "Maryam K", email = "audreyr@example.com"}
-]
-classifiers = [
+description = "Financial Investment Assistant Chatbot"
+authors = ["Romina <romina.forouzanfar@gmail.com>"]
+readme = "README.md"
 
-]
-license = {text = "MIT license"}
-dependencies = [
-  "typer"
-]
+[tool.poetry.dependencies]
+python = "^3.11"
+redis = "^5.1.0"
+arrow = "1.3.0"
+binaryornot = "0.4.4"
+blinker = "1.8.2"
+certifi = "2024.8.30"
+chardet = "5.2.0"
+charset-normalizer = "3.3.2"
+click = "8.1.7"
+cookiecutter = "2.6.0"
+flask = "3.0.3"
+idna = "3.10"
+itsdangerous = "2.2.0"
+jinja2 = "3.1.4"
+markdown-it-py = "3.0.0"
+markupsafe = "2.1.5"
+mdurl = "0.1.2"
+pygments = "2.18.0"
+python-dateutil = "2.9.0.post0"
+python-dotenv = "1.0.1"
+python-slugify = "8.0.4"
+pyyaml = "6.0.2"
+requests = "2.32.3"
+rich = "13.8.1"
+six = "1.16.0"
+text-unidecode = "1.3"
+types-python-dateutil = "2.9.0.20240906"
+urllib3 = "2.2.3"
+werkzeug = "3.0.4"
+yfinance = "0.2.26"
+scrapy = "2.10.1"
+langchain = "0.0.300"
+faiss-cpu = "1.7.4"
+ratelimit = "^2.2.1"
+psycopg2-binary = "^2.9.9"
+finnhub-python = "^2.4.20"
+prometheus-client = "^0.21.0"
 
-[project.optional-dependencies]
-dev = [
-    "coverage",  # testing
-    "mypy",  # linting
-    "pytest",  # testing
-    "ruff"  # linting
-]
 
-[project.urls]
-
-bugs = "https://github.com/maryamkhlj/fin_chatbot/issues"
-changelog = "https://github.com/maryamkhlj/fin_chatbot/blob/master/changelog.md"
-homepage = "https://github.com/maryamkhlj/fin_chatbot"
-
-[tool.setuptools]
-package-dir = {"" = "src"}
-
-[tool.setuptools.package-data]
-"*" = ["*.*"]
-
-
-
-
-# Mypy
-# ----
-
-[tool.mypy]
-files = "."
-
-# Use strict defaults
-strict = true
-warn_unreachable = true
-warn_no_return = true
-
-[[tool.mypy.overrides]]
-# Don't require test functions to include types
-module = "tests.*"
-allow_untyped_defs = true
-disable_error_code = "attr-defined"
-
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

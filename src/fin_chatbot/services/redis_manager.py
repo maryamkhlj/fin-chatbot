@@ -1,108 +1,89 @@
 import redis
-import logging
-import os
 import json
 import time
+import logging
 from dotenv import load_dotenv
+import os
 
-# Load environment variables
 load_dotenv()
 
-# Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class RedisManager:
     def __init__(self):
-        self.redis_host = os.getenv('REDIS_HOST', 'localhost')
-        self.redis_port = int(os.getenv('REDIS_PORT', 6379))
-        self.redis_db = int(os.getenv('REDIS_DB', 0))
-        self.connect()
+        self.redis = redis.Redis(
+            host=os.getenv('REDIS_HOST', 'localhost'),
+            port=int(os.getenv('REDIS_PORT', 6379)),
+            db=int(os.getenv('REDIS_DB', 0)),
+            password=os.getenv('REDIS_PASSWORD')
+        )
 
-    def connect(self):
-        try:
-            self.redis_client = redis.Redis(
-                host=self.redis_host, 
-                port=self.redis_port, 
-                db=self.redis_db,
-                decode_responses=True
-            )
-            self.redis_client.ping()  # Test the connection
-            logger.info(f"Connected to Redis at {self.redis_host}:{self.redis_port}")
-        except redis.ConnectionError as e:
-            logger.error(f"Failed to connect to Redis: {e}")
-            raise
-
+    def validate_stock_data(self, symbol, price, timestamp=None):
+        if not isinstance(symbol, str) or len(symbol) > 10:
+            raise ValueError("Invalid symbol")
+        
+        if not isinstance(price, (int, float)) or price < 0:
+            raise ValueError("Invalid price")
+        
+        if timestamp is not None and not isinstance(timestamp, (int, float)):
+            raise ValueError("Invalid timestamp")
+        
+        return True
+    
     def set_stock_price(self, symbol, price, timestamp=None):
         try:
-            key = f"stock:{symbol}:price"
-            if timestamp is None:
-                timestamp = int(time.time())
-            self.redis_client.zadd(key, {f"{price}:{timestamp}": timestamp})
-            logger.debug(f"Stock price set for {symbol}: {price} at {timestamp}")
+            if self.validate_stock_data(symbol, price, timestamp):
+                if timestamp is None:
+                    timestamp = time.time()
+                self.redis.hset(f"stock:{symbol}", mapping={
+                    "price": price,
+                    "timestamp": timestamp
+                })
+                logger.info(f"Stock price set for {symbol}: {price} at {timestamp}")
+        except ValueError as e:
+            logger.error(f"Data validation failed for {symbol}: {e}")
         except redis.RedisError as e:
-            logger.error(f"Error setting stock price: {e}")
+            logger.error(f"Redis error setting stock price for {symbol}: {e}")
 
-    def get_stock_prices(self, symbol, start_time='-inf', end_time='+inf', limit=10):
+    def get_stock_prices(self, symbol, limit=10):
         try:
-            key = f"stock:{symbol}:price"
-            data = self.redis_client.zrevrangebyscore(key, end_time, start_time, start=0, num=limit, withscores=True)
-            parsed_data = [(float(item[0].split(':')[0]), int(item[1])) for item in data]
-            logger.debug(f"Stock prices retrieved for {symbol}")
-            return parsed_data
+            data = self.redis.hgetall(f"stock:{symbol}")
+            if data:
+                price = float(data[b'price'])
+                timestamp = float(data[b'timestamp'])
+                return [(price, timestamp)]
+            return []
         except redis.RedisError as e:
-            logger.error(f"Error getting stock prices: {e}")
+            logger.error(f"Redis error getting stock prices for {symbol}: {e}")
             return []
 
     def get_latest_stock_price(self, symbol):
         try:
-            key = f"stock:{symbol}:price"
-            data = self.redis_client.zrevrange(key, 0, 0, withscores=True)
+            data = self.redis.hgetall(f"stock:{symbol}")
             if data:
-                price, timestamp = data[0][0].split(':')[0], data[0][1]
-                return float(price), int(timestamp)
-            return None, None
+                price = float(data[b'price'])
+                timestamp = float(data[b'timestamp'])
+                return (price, timestamp)
+            return (None, None)
         except redis.RedisError as e:
-            logger.error(f"Error getting latest stock price: {e}")
-            return None, None
+            logger.error(f"Redis error getting latest stock price for {symbol}: {e}")
+            return (None, None)
 
     def get_all_symbols(self):
         try:
-            keys = self.redis_client.keys("stock:*:price")
-            return [key.split(':')[1] for key in keys]
+            keys = self.redis.keys("stock:*")
+            return [key.decode().split(':')[1] for key in keys]
         except redis.RedisError as e:
-            logger.error(f"Error getting stock symbols: {e}")
+            logger.error(f"Redis error getting all symbols: {e}")
             return []
 
-    def get_all_keys(self, pattern="*"):
-        try:
-            return self.redis_client.keys(pattern)
-        except redis.RedisError as e:
-            logger.error(f"Error getting keys: {e}")
-            return []
+    def get_total_stored_stocks(self):
+        return len(self.get_all_symbols())
 
-    def delete_keys(self, keys):
+    def delete_stock_data(self, symbol):
         try:
-            return self.redis_client.delete(*keys)
-        except redis.RedisError as e:
-            logger.error(f"Error deleting keys: {e}")
-            return 0
-
-    def cache_stock_list(self, exchange, stocks):
-        try:
-            key = f"stock_list:{exchange}"
-            self.redis_client.set(key, json.dumps(stocks))
-            logger.info(f"Cached stock list for exchange {exchange}")
-        except redis.RedisError as e:
-            logger.error(f"Error caching stock list: {e}")
-
-    def get_cached_stock_list(self, exchange):
-        try:
-            key = f"stock_list:{exchange}"
-            cached_stocks = self.redis_client.get(key)
-            if cached_stocks:
-                return json.loads(cached_stocks)
-            return None
-        except redis.RedisError as e:
-            logger.error(f"Error getting cached stock list: {e}")
-            return None
+            deleted = self.redis.delete(f"stock:{symbol}")
+            return deleted > 0
+        except Exception as e:
+            logger.error(f"Error deleting data for {symbol}: {e}")
+            return False
